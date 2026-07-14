@@ -22,7 +22,7 @@ def render_recommendation_cards(recommendations: pd.DataFrame):
         with st.container(border=True):
             st.markdown(f"### #{int(row['rank'])} — {row.get('product_title', 'Produk')}")
 
-            col1, col2, col3, col4 = st.columns(4)
+            col1, col2, col3 = st.columns(3)
 
             with col1:
                 st.metric("Final Score", f"{row.get('final_score', 0):.4f}")
@@ -36,13 +36,6 @@ def render_recommendation_cards(recommendations: pd.DataFrame):
                     st.metric("Avg Rating", f"{avg_rating:.2f}")
                 else:
                     st.metric("Avg Rating", "-")
-
-            with col4:
-                review_count = row.get("review_count", None)
-                if pd.notna(review_count):
-                    st.metric("Review Count", int(review_count))
-                else:
-                    st.metric("Review Count", "-")
 
             st.caption(f"Product ID: {row.get('product_id', '-')}")
             st.caption(f"Category: {row.get('product_category', '-')}")

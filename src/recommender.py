@@ -38,9 +38,13 @@ class SBERTVADERRecommender:
                 f"Catalog: {len(self.catalog)}, Embedding: {self.product_embeddings.shape[0]}"
             )
 
-        if os.path.exists(local_sbert_path):
+        if self._is_valid_sbert_model_dir(local_sbert_path):
             self.sbert_model = SentenceTransformer(local_sbert_path)
         else:
+            print(
+                f"Folder SBERT lokal tidak lengkap atau tidak ditemukan: {local_sbert_path}. "
+                "Model akan dimuat dari Hugging Face."
+            )
             self.sbert_model = SentenceTransformer(self.config["sbert_model_name"])
 
         self.alpha = float(self.config.get("alpha_sbert", 0.95))
@@ -166,3 +170,24 @@ class SBERTVADERRecommender:
             if col in df.columns:
                 return col
         return None
+    @staticmethod
+    
+    def _is_valid_sbert_model_dir(model_path: str) -> bool:
+        if not os.path.isdir(model_path):
+            return False
+
+        has_modules = os.path.exists(os.path.join(model_path, "modules.json"))
+        has_config = os.path.exists(os.path.join(model_path, "config.json"))
+
+        has_weight_file = any(
+            os.path.exists(os.path.join(model_path, filename))
+            for filename in [
+                "model.safetensors",
+                "pytorch_model.bin",
+                "tf_model.h5",
+                "model.ckpt.index",
+                "flax_model.msgpack",
+            ]
+        )
+
+        return has_modules and has_config and has_weight_file
